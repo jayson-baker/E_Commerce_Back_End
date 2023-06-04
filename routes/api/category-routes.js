@@ -8,7 +8,7 @@ router.get("/", async (req, res) => {
   // be sure to include its associated Products
   try {
     const categoryData = await Category.findAll({
-      include: [{ model: Product, as: "Products" }],
+      include: [{ model: Product }],
     });
     res.status(200).json(categoryData);
   } catch (err) {
@@ -20,8 +20,8 @@ router.get("/:id", async (req, res) => {
   // find one category by its `id` value
   // be sure to include its associated Products
   try {
-    const catagoryData = await Tag.findByPk(req.params.id, {
-      include: [{ model: Product, as: "Products" }],
+    const catagoryData = await Category.findByPk(req.params.id, {
+      include: [{ model: Product }],
     });
 
     if (!catagoryData) {
@@ -34,29 +34,32 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   // create a new category
-  //   Category.create(req.body)
-  //     .then((catagory) => {
-  //       if (req.body.tagIds.length) {
-  //         const catagoryTagIdArr = req.body.tagIds.map((category_name) => {
-  //           return {
-  //             category_name: category_name,
-  //           };
-  //         });
-  //         return ProductTag.bulkCreate(catagoryTagIdArr);
-  //       }
-  //       res.status(200).json(catagory);
-  //     })
-  //     .then((catagoryTagIds) => res.status(200).json(catagoryTagIds))
-  //     .catch((err) => {
-  //       console.log(err);
-  //       res.status(400).json(err);
-  //     });
+  try {
+    const categoryData = await Category.create(req.body);
+    res.status(200).json(categoryData);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", async (req, res) => {
   // update a category by its `id` value
+  try {
+    const categoryData = await Category.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
+    });
+    if (!categoryData) {
+      res.status(404).json({ message: "No Category found with this id.." });
+      return;
+    }
+    res.status(200).json(categoryData);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 router.delete("/:id", async (req, res) => {
